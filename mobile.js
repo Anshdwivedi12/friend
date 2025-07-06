@@ -1,156 +1,87 @@
-// Global variables
-let highestZ = 1;
-let activePaper = null;
-let isDragging = false;
-let startX = 0;
-let startY = 0;
-let currentX = 0;
-let currentY = 0;
+@import url('https://fonts.googleapis.com/css2?family=Zeyada&display=swap');
 
-// Touch event handlers
-function handleTouchStart(e) {
-  e.preventDefault();
-  e.stopPropagation();
+
+
+
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-size: 1000px;
+  background-image: url("https://www.psdgraphics.com/wp-content/uploads/2022/01/white-math-paper-texture.jpg");
+  background-position: center center;
   
-  const touch = e.touches[0];
-  const paper = e.currentTarget;
-  
-  console.log('Touch started on paper!', touch.clientX, touch.clientY);
-  
-  // Set as active paper
-  activePaper = paper;
-  isDragging = true;
-  
-  // Bring to front
-  paper.style.zIndex = highestZ++;
-  
-  // Get initial touch position
-  startX = touch.clientX;
-  startY = touch.clientY;
-  
-  // Get current paper position
-  const transform = window.getComputedStyle(paper).transform;
-  const matrix = new DOMMatrix(transform);
-  currentX = matrix.m41;
-  currentY = matrix.m42;
-  
-  // Visual feedback
-  paper.style.transition = 'none';
-  paper.style.opacity = '0.8';
-  paper.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotateZ(${Math.random() * 30 - 15}deg)`;
+  /* Prevent touch issues on mobile */
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
-function handleTouchMove(e) {
-  e.preventDefault();
-  e.stopPropagation();
+.paper {
+  background-image: url("https://i0.wp.com/textures.world/wp-content/uploads/2018/10/2-Millimeter-Paper-Background-copy.jpg?ssl=1");
+  background-size: 500px;
+  background-position: center center;
+  padding: 20px 100px;
+/*  min-width: 800px; */
   
-  if (!isDragging || !activePaper) return;
+  transform: rotateZ(-5deg);
+  box-shadow: 1px 15px 20px 0px rgba(0,0,0,0.5);
   
-  const touch = e.touches[0];
-  
-  // Calculate new position
-  const deltaX = touch.clientX - startX;
-  const deltaY = touch.clientY - startY;
-  
-  const newX = currentX + deltaX;
-  const newY = currentY + deltaY;
-  
-  // Apply transform
-  const rotation = Math.random() * 30 - 15;
-  activePaper.style.transform = `translateX(${newX}px) translateY(${newY}px) rotateZ(${rotation}deg)`;
-  
-  console.log('Dragging paper:', newX, newY);
+  position: absolute;
+  touch-action: none; /* Prevents default touch behaviors */
+  user-select: none; /* Prevents text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: grab; /* Shows grab cursor on desktop */
+  will-change: transform; /* Optimizes for animations */
+  -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile */
 }
 
-function handleTouchEnd(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  if (!activePaper) return;
-  
-  // Reset visual feedback
-  activePaper.style.transition = 'opacity 0.2s ease';
-  activePaper.style.opacity = '1';
-  
-  // Reset state
-  activePaper = null;
-  isDragging = false;
+.paper.heart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  padding: 0;
+  border-radius: 50%;
 }
 
-function handleTouchCancel(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  if (!activePaper) return;
-  
-  // Reset visual feedback
-  activePaper.style.transition = 'opacity 0.2s ease';
-  activePaper.style.opacity = '1';
-  
-  // Reset state
-  activePaper = null;
-  isDragging = false;
+.paper.image {
+  padding: 10px;
+}
+.paper.image p {
+  font-size: 30px;
 }
 
-// Initialize when DOM is loaded
-function initializePapers() {
-  console.log('Initializing mobile touch functionality...');
-  
-  // Check if device supports touch
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  console.log('Touch device detected:', isTouchDevice);
-  
-  // Get all paper elements
-  const papers = document.querySelectorAll('.paper');
-  console.log('Found papers:', papers.length);
-  
-  // Add touch event listeners to each paper
-  papers.forEach((paper, index) => {
-    console.log(`Adding touch listeners to paper ${index + 1}`);
-    
-    // Remove any existing listeners
-    paper.removeEventListener('touchstart', handleTouchStart);
-    paper.removeEventListener('touchmove', handleTouchMove);
-    paper.removeEventListener('touchend', handleTouchEnd);
-    paper.removeEventListener('touchcancel', handleTouchCancel);
-    
-    // Add new listeners
-    paper.addEventListener('touchstart', handleTouchStart, { passive: false });
-    paper.addEventListener('touchmove', handleTouchMove, { passive: false });
-    paper.addEventListener('touchend', handleTouchEnd, { passive: false });
-    paper.addEventListener('touchcancel', handleTouchCancel, { passive: false });
-    
-    // Prevent context menu
-    paper.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-    });
-    
-    // Set initial transform if not already set
-    if (!paper.style.transform) {
-      paper.style.transform = `rotateZ(${Math.random() * 30 - 15}deg)`;
-    }
-  });
-  
-  // Prevent body scrolling when touching papers
-  document.body.addEventListener('touchmove', (e) => {
-    if (e.target.closest('.paper')) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-  
-  console.log('Mobile touch initialization complete!');
+img {
+  max-height: 200px;
+  width: 100%;
+  user-select: none;
 }
 
-// Wait for DOM to be ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializePapers);
-} else {
-  // DOM is already ready
-  initializePapers();
+.paper.heart::after {
+  content: "";
+  background-image: url('https://cdn.pixabay.com/photo/2016/03/31/19/25/cartoon-1294994__340.png');
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-size: 150px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  opacity: 0.6;
 }
 
-// Also initialize on window load as backup
-window.addEventListener('load', () => {
-  console.log('Window loaded, ensuring papers are initialized...');
-  setTimeout(initializePapers, 100);
-});
+p {
+  font-family: 'Zeyada';
+  font-size: 50px;
+  color: rgb(0,0,100);
+  opacity: 0.75;
+  user-select: none;
+  
+  /* filter: drop-shadow(2px 1.5px 1px rgba(0,0,105,0.9)); */
+}
